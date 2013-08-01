@@ -31,6 +31,18 @@ describe Virsandra::SelectQuery do
     end
   end
 
+  describe "#select" do
+    subject{ super().select("id, name").to_s }
+
+    it{ should eq('SELECT id, name')}
+
+    context 'columns given as array' do
+      subject{ query.select([:uuid, :name]).to_s }
+
+      it{ should eq('SELECT uuid, name')}
+    end
+  end
+
   describe "#from" do
     subject{ super().from("foo").to_s }
 

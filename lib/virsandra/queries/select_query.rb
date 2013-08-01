@@ -5,6 +5,11 @@ module Virsandra
       @skip_validation = skip_validation
     end
 
+    def select *columns
+      @columns = columns
+      self
+    end
+
     def from(table)
       @from = TableQuery.new("FROM", table)
       self

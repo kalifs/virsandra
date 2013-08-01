@@ -1,8 +1,21 @@
+require_relative 'model_queries/select_query'
+
 module Virsandra
   class ModelQuery
 
     def initialize(model)
       @model = model
+    end
+
+    def select(*columns)
+      select_query.select(*columns)
+      select_query
+    end
+
+    def where(params)
+      validate_search_params!(params)
+      select_query.where(params)
+      select_query
     end
 
     def find_by_key
@@ -21,21 +34,31 @@ module Virsandra
       query.fetch
     end
 
-    def where(params)
-      query = Query.select.from(@model.table)
+    # def where(params)
+    #   query = Query.select.from(@model.table)
 
-      unless params.empty?
-        raise ArgumentError.new("Invalid search terms") unless valid_search_params?(params)
-        query.where(params)
-      end
+    #   unless params.empty?
+    #     raise ArgumentError.new("Invalid search terms") unless valid_search_params?(params)
+    #     query.where(params)
+    #   end
 
-      query_enumerator(query)
-    end
+    #   query_enumerator(query)
+    # end
 
     private
 
+    def select_query
+      @select_query ||= Virsandra::ModelSelectQuery.new(@model)
+    end
+
+    def validate_search_params!(params)
+      if params.any? && !valid_search_params?(params)
+        raise ArgumentError.new("Invalid search terms #{params.inspect}")
+      end
+    end
+
     def valid_search_params?(params)
-      params.keys.all? { |k| @model.column_names.include?(k.to_sym) }
+      params.keys.all? { |key| @model.column_names.include?(key.to_sym) }
     end
 
     def query_enumerator(query)
